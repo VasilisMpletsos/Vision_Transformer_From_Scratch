@@ -15,3 +15,10 @@ if __name__ == "__main__":
     test_dataset = MyCustomImageFolderDatset(
         images_path="./data/images/test", includes_labels=False
     )
+    train_loader = DataLoader(train_dataset, shuffle=True, batch_size=4)
+    test_loader = DataLoader(test_dataset, shuffle=False, batch_size=4)
+
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    print(
+        f"Using {device} device: {torch.cuda.get_device_name(device) if torch.cuda.is_available() else ''}"
+    )

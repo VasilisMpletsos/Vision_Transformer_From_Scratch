@@ -32,8 +32,9 @@ class MyCustomImageFolderDatset(Dataset):
     def __getitem__(
         self, index
     ) -> Union[Tuple[torch.Tensor, torch.Tensor], torch.Tensor]:
-        numpy_image = decode_image(self.images[index])
+        image = Image.open(self.images[index]).convert("L")  # Convert to grayscale
+        tensor_image = ToTensor()(image)
         if self.labels:
-            return numpy_image, torch.tensor(int(self.labels[index]))
+            return tensor_image, torch.tensor(int(self.labels[index]))
         else:
-            return numpy_image
+            return tensor_image

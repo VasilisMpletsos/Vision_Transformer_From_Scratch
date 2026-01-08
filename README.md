@@ -34,3 +34,6 @@ We may though meet a performance wall and not do better than custom small networ
 ##
 
 `Our solution is to explore the size of the neural network by making it configurable.`
+
+Here is an image of positional encoding (with sin/cos) that still facinates me.
+![Positional Encoding](./assets//positional_encoding.png)
