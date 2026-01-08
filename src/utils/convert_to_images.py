@@ -35,5 +35,5 @@ def convert_dataset_to_images(images_path: str, image_shape=(28, 28)):
                 label_dir = Path(images_folder)
 
             # Save the image
-            image_path = label_dir / f"image_{i}.png"
+            image_path = label_dir / f"image_{i}.jpg"
             plt.imsave(image_path, image_data, cmap="gray")
