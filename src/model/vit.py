@@ -1,10 +1,17 @@
 import torch
 import torch.nn as nn
 
+from .encoder import MyEncoderBlock
+
 
 class MyViT(nn.Module):
     def __init__(
-        self, n_patches: int = 7, img_size: tuple = (1, 28, 28), hidden_dim=16
+        self,
+        n_patches: int = 7,
+        img_size: tuple = (1, 28, 28),
+        hidden_dim=16,
+        n_heads=2,
+        n_classes=10,
     ):
         super().__init__()
         self.n_patches = n_patches
@@ -18,7 +25,19 @@ class MyViT(nn.Module):
 
         self.class_token = nn.Parameter((torch.rand(1, hidden_dim)))
         self.pos_embed = nn.Parameter(
-            self._get_positional_encoding(self.n_patches**2 + 1, hidden_dim)
+            self._get_positional_encoding(self.n_patches**2 + 1, hidden_dim),
+            requires_grad=False,
+        )
+        self.encoder_blocks = nn.ModuleList(
+            [
+                MyEncoderBlock(
+                    dimension=hidden_dim,
+                    n_heads=n_heads,
+                )
+            ]
+        )
+        self.classification_head = nn.Sequential(
+            nn.Linear(hidden_dim, n_classes), nn.Softmax(dim=-1)
         )
 
     def _patchify(self, x):
@@ -62,4 +81,7 @@ class MyViT(nn.Module):
         x = self.projection(x)
         x = torch.stack([torch.vstack((self.class_token, x[i])) for i in range(n)])
         x = x + self.pos_embed
+        # Until here we are at z0 = [xclass; x_1^{pE}; ...; x_N^{pE}] + Epos
+        for encoder_block in self.encoder_blocks:
+            x = encoder_block(x)
         return x
