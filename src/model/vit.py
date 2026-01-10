@@ -36,15 +36,15 @@ class MyViT(nn.Module):
                 )
             ]
         )
-        self.classification_head = nn.Sequential(
-            nn.Linear(hidden_dim, n_classes), nn.Softmax(dim=-1)
-        )
+        self.classification_head = nn.Linear(hidden_dim, n_classes)
 
     def _patchify(self, x):
         n, c, h, w = x.shape
         assert h == w, "Height and Widht must be save for patches to work"
 
-        patches = torch.zeros(n, self.n_patches**2, h * w * c // (self.n_patches**2))
+        patches = torch.zeros(
+            n, self.n_patches**2, h * w * c // (self.n_patches**2), device=x.device
+        )
         size = h // self.n_patches
         for idx, image in enumerate(x):
             for pos_x in range(self.n_patches):
@@ -82,6 +82,16 @@ class MyViT(nn.Module):
         x = torch.stack([torch.vstack((self.class_token, x[i])) for i in range(n)])
         x = x + self.pos_embed
         # Until here we are at z0 = [xclass; x_1^{pE}; ...; x_N^{pE}] + Epos
+
+        # ---
+        # Then Transformer Encoder Block holds both:
+        # - z_l' = MSA(LN(z_{l-1})) + z_{l-1}
+        # - z_l  = MLP(LN(z_l')) + z_l'
+        # ---
         for encoder_block in self.encoder_blocks:
             x = encoder_block(x)
+
+        # And finally we have
+        # y = LN(z^0_L)
+        x = self.classification_head(x[:, 0])
         return x
