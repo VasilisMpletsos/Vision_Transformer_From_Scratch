@@ -19,6 +19,17 @@
       <em>Vision Transformer</em>
     </td>
   </tr>
+    <td align="center">
+      <img src="./assets/patches.png" alt="Patches of Image" width="400"/><br>
+      <em>Patches of Image</em>
+    </td>
+    <td align="center">
+      <img src="./assets/vision_transformer.png" alt="Vision Transformer" width="0"/><br>
+      <em>No Image</em>
+    </td>
+  <tr>
+  </tr>
+  
 </table>
 
 ## 🚀 About This Project
@@ -37,3 +48,24 @@ We may though meet a performance wall and not do better than custom small networ
 
 Here is an image of positional encoding (with sin/cos) that still facinates me.
 ![Positional Encoding](./assets//positional_encoding.png)
+
+## Speedups
+
+A very intresting and a classical pain point is the handling of images / tensors in pytorch. You can do it in the naive programming way or you can utilize
+pytorch built in crazy ways. One of the most classical ones is the rearrange, view and transpose that can give awesome amout of speedups. In our case i used first the naive way and then the pytorch way for the \_patchify function and the results speak for themselves **x48_407 boost**
+
+- Torch way: 6.28 μs ± 95.2 ns
+- Custom way: 304 ms ± 6.6 ms
+<table>
+  <tr>
+    <td align="center">
+      <img src="./assets/slow_patcify.png" alt="Slow Patchify" width="600"/><br>
+      <em>Slows Patchify</em>
+    </td>
+    <td align="center">
+      <img src="./assets/fast_patchify.png" alt="Fast Patchify" width="600"/><br>
+      <em>Fast Patchify</em>
+    </td>
+  </tr>
+  <tr>
+  </tr>

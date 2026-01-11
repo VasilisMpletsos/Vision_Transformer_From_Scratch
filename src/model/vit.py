@@ -41,20 +41,33 @@ class MyViT(nn.Module):
     def _patchify(self, x):
         n, c, h, w = x.shape
         assert h == w, "Height and Widht must be save for patches to work"
+        patch_size = h // self.n_patches
 
         patches = torch.zeros(
             n, self.n_patches**2, h * w * c // (self.n_patches**2), device=x.device
         )
-        size = h // self.n_patches
         for idx, image in enumerate(x):
             for pos_x in range(self.n_patches):
                 for pos_y in range(self.n_patches):
-                    start_x = pos_x * size
-                    end_x = start_x + size
-                    start_y = pos_y * size
-                    end_y = start_y + size
+                    start_x = pos_x * patch_size
+                    end_x = start_x + patch_size
+                    start_y = pos_y * patch_size
+                    end_y = start_y + patch_size
                     patch_image = image[:, start_x:end_x, start_y:end_y]
                     patches[idx, pos_x * self.n_patches + pos_y] = patch_image.flatten()
+
+        return patches
+
+    def _patchify_fast(self, x):
+        n, c, h, w = x.shape
+        assert h == w, "Height and Widht must be save for patches to work"
+        patch_size = h // self.n_patches
+
+        # I am using a faster implementation with torch view and transpose combination
+        patches = x.reshape(
+            n, self.n_patches, patch_size, self.n_patches, patch_size, c
+        ).transpose(3, 4)
+        patches = x.view(n, self.n_patches**2, -1)
 
         return patches
 
@@ -77,7 +90,7 @@ class MyViT(nn.Module):
 
     def forward(self, x):
         n = x.shape[0]
-        x = self._patchify(x)
+        x = self._patchify_fast(x)
         x = self.projection(x)
         x = torch.stack([torch.vstack((self.class_token, x[i])) for i in range(n)])
         x = x + self.pos_embed

@@ -29,12 +29,12 @@ if __name__ == "__main__":
 
     EPOCHS = 10
     # As described in the paper
-    # "We train all models, using Adam (Kingma & Ba,2015) with β1 = 0.9, β2 = 0.999, a batch size of 4096 and apply a high weight decay of 0.1
+    # "We train all models, using Adam (Kingma & Ba,2015) with β1 = 0.9, β2 = 0.999, a batch size of 4096 and apply a high weight decay of 0.1 (i am lowering it to 0.01)
     # And also in Table 3 the best learning rate for ViT Base is 8*10e-4
     optimizer = Adam(
-        vit_model.parameters(), lr=0.001, betas=(0.9, 0.999), weight_decay=0.01
+        vit_model.parameters(), lr=8 * 10e-4, betas=(0.9, 0.999), weight_decay=0.01
     )
-    loss_func = CrossEntropyLoss(label_smoothing=0)
+    loss_func = CrossEntropyLoss(label_smoothing=0.05)
 
     for epoch in range(EPOCHS):
         vit_model.train()
