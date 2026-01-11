@@ -28,7 +28,7 @@ if __name__ == "__main__":
     train_dataset = MyCustomImageFolderDatset(
         images_path="./data/images/train",
         includes_labels=True,
-        transforms=training_transforms,
+        # transforms=training_transforms,
     )
     validation_dataset = MyCustomImageFolderDatset(
         images_path="./data/images/val", includes_labels=True
