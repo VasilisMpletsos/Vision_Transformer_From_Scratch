@@ -4,13 +4,19 @@ from typing import Tuple, Union
 import torch
 from PIL import Image
 from torch.utils.data import Dataset
-from torchvision.io import decode_image
 from torchvision.transforms import ToTensor
+from torchvision.transforms.v2 import Compose
 
 
 class MyCustomImageFolderDatset(Dataset):
-    def __init__(self, images_path: Path, includes_labels: bool = True):
+    def __init__(
+        self,
+        images_path: Path,
+        includes_labels: bool = True,
+        transforms: Union[Compose, None] = None,
+    ):
         super().__init__()
+        self.transforms = transforms
         file_path = Path(images_path)
         self.images = []
         self.labels = []
@@ -34,6 +40,8 @@ class MyCustomImageFolderDatset(Dataset):
     ) -> Union[Tuple[torch.Tensor, torch.Tensor], torch.Tensor]:
         image = Image.open(self.images[index]).convert("L")  # Convert to grayscale
         tensor_image = ToTensor()(image)
+        if self.transforms:
+            tensor_image = self.transforms(tensor_image)
         if self.labels:
             return tensor_image, torch.tensor(int(self.labels[index]))
         else:
