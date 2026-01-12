@@ -19,6 +19,7 @@
       <em>Vision Transformer</em>
     </td>
   </tr>
+  <tr>
     <td align="center">
       <img src="./assets/patches.png" alt="Patches of Image" width="400"/><br>
       <em>Patches of Image</em>
@@ -27,9 +28,17 @@
       <img src="./assets/random_transforms.png" alt="Random Transformations" width="400"/><br>
       <em>Training Transformations</em>
     </td>
-  <tr>
   </tr>
-  
+  <tr>
+    <td align="center">
+      <img src="./assets/positional_encoding.png" alt="Positional Encodings" width="600"/><br>
+      <em>Patches of Image</em>
+    </td>
+    <td align="center">
+      <img src="./assets/vit_performance.png" alt="Random Transformations" width="600"/><br>
+      <em>Training Transformations</em>
+    </td>
+  </tr>
 </table>
 
 ## 🚀 About This Project
@@ -45,10 +54,6 @@ We may though meet a performance wall and not do better than custom small networ
 ##
 
 `Our solution is to explore the size of the neural network by making it configurable.`
-
-Here is an image of positional encoding (with sin/cos) that still facinates me.
-<br>
-![Positional Encoding](./assets//positional_encoding.png)
 
 ## Speedups
 
