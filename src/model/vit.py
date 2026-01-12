@@ -26,7 +26,7 @@ class MyViT(nn.Module):
         self.class_token = nn.Parameter((torch.rand(1, hidden_dim)))
         self.pos_embed = nn.Parameter(
             self._get_positional_encoding(self.n_patches**2 + 1, hidden_dim),
-            requires_grad=False,
+            # requires_grad=False,
         )
         self.encoder_blocks = nn.ModuleList(
             [

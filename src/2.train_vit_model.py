@@ -1,10 +1,8 @@
-import numpy as np
 import torch
-import torch.nn as nn
-from regex import W
+from sklearn import metrics
 from torch.nn import CrossEntropyLoss
 from torch.optim import Adam, AdamW
-from torch.optim.lr_scheduler import CosineAnnealingLR
+from torch.optim.lr_scheduler import CosineAnnealingLR, ReduceLROnPlateau
 from torch.utils.data import DataLoader
 from torch.utils.tensorboard import SummaryWriter
 from torchvision.transforms import v2
@@ -14,21 +12,23 @@ from model import MyViT
 from utils import MyCustomImageFolderDatset
 
 if __name__ == "__main__":
-    writer = SummaryWriter("./logs/vit_model/")
+    writer = SummaryWriter(
+        "./logs/vit_model_8_block_position_grad_enabled/", comment="With Transforms"
+    )
     # Here i create transforms that i can pass to my custom image dataset and perform random ajdjustments during training to boost results
     training_transforms = v2.Compose(
         [
             v2.RandomRotation(45),
-            v2.RandomAffine(15),
             v2.RandomHorizontalFlip(p=0.2),
             v2.RandomResizedCrop(size=(28, 28), antialias=True, scale=(0.7, 1.0)),
+            v2.RandomAffine(15),
         ]
     )
 
     train_dataset = MyCustomImageFolderDatset(
         images_path="./data/images/train",
         includes_labels=True,
-        # transforms=training_transforms,
+        transforms=training_transforms,
     )
     validation_dataset = MyCustomImageFolderDatset(
         images_path="./data/images/val", includes_labels=True
@@ -41,7 +41,7 @@ if __name__ == "__main__":
         f"Using {device} device: {torch.cuda.get_device_name(device) if torch.cuda.is_available() else ''}"
     )
 
-    vit_model = MyViT(4, (1, 28, 28), 16, 2, 10)
+    vit_model = MyViT(4, (1, 28, 28), 16, 8, 10)
     vit_model = vit_model.to("cuda")
 
     EPOCHS = 50
@@ -51,8 +51,14 @@ if __name__ == "__main__":
     # optimizer = Adam(
     #     vit_model.parameters(), lr=0.01, betas=(0.9, 0.999), weight_decay=0.01
     # )
-    optimizer = AdamW(vit_model.parameters(), lr=0.001, weight_decay=0.01)
-    scheduler = CosineAnnealingLR(optimizer, T_max=10, eta_min=1e-4)
+    optimizer = AdamW(vit_model.parameters(), lr=0.005, weight_decay=0.01)
+    # scheduler = CosineAnnealingLR(optimizer, T_max=30, eta_min=1e-4)
+    scheduler = ReduceLROnPlateau(
+        optimizer,
+        mode="min",
+        factor=0.1,
+        patience=5,
+    )
     loss_func = CrossEntropyLoss(label_smoothing=0)
 
     train_size = len(train_dataset)
@@ -86,7 +92,7 @@ if __name__ == "__main__":
         )
         writer.add_scalar("Loss/train", epoch_train_loss, epoch + 1)
         writer.add_scalar("Accuracy/train", train_accuracy, epoch + 1)
-        scheduler.step()
+        scheduler.step(epoch_train_loss)
 
         vit_model.eval()
         epoch_validation_loss = 0
